@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# -----------------------------------------------------------------------------
+# Author: Paul Weaver (weaverp@ruthorn.co.uk)
+#
+# Assign the prompt_command function defined below to the PROMPT_COMMAND
+# environment variable in your .bashrc/.bash_profile to get a pretty prompt
+# containing a bunch of information.
+#
+# Note: I don't provide a warranty of any kind with this software! On the plus
+# side, however, please feel free to distribute this file to your friends,
+# family, pets etc. (So long as you keep this attribution)
+# -----------------------------------------------------------------------------
+
+# NOTE colours will just fail silently if not present aside from the intial
+# warning that .bash_colours is missing.
+source $HOME/.bash_colors
+
+function _padding {
+    # Creates a string of spaces of the passed size
+    local size=$1
+    local result
+    printf -v result "%${size}s" ' '
+    echo "$result"
+}
+function _repeat_chars {
+    # Creates a string of <size> repeats of <char>
+    local char=$1
+    local size=$2
+    local temp_str=$(_padding ${size})
+    echo ${temp_str// /${char}}
+}
+
+function prompt_command {
+    # Must be the first thing we do, otherwise other exit statuses overwrite $?
+    local exit_status=$?
+    if [[ $exit_status == 0 ]]; then
+        local exit_status_text=${BGreen}✓${Color_Off}
+    else
+        local exit_status_text=${BRed}✗${Color_Off}
+    fi
+
+    # Must run this early because when we use $() this adds to our jobs count
+    local total_jobs=$(jobs | wc -l)
+    local stopped_jobs=$(jobs -s | wc -l)
+    if [[ ${total_jobs} != 0 ]]; then
+        if [[ ${stopped_jobs} == 0 ]]; then
+            local jobs_text="${LightGray}[${total_jobs}] ${Color_Off}"
+        else
+            local jobs_text="${LightGray}[${BRed}${stopped_jobs}${LightGray}/${total_jobs}] ${Color_Off}"
+        fi
+    fi
+
+    local hostname=${HOSTNAME#.*}
+    local username=$(whoami)
+    local host_text=${LightGray}${username}@${hostname}${Color_Off}
+
+    local git_text git_text_color git_ahead
+    if git branch &> /dev/null; then
+        # git is working and we're on a git branch
+        if git status | grep "nothing to commit" > /dev/null 2>&1; then
+            # Clean repository - nothing to commit
+            git_text="${Green} $(__git_ps1 "(%s)") ${Color_Off}"
+        elif git status | grep "nothing added to commit but untracked files present" > /dev/null 2>&1; then
+            # No changes but files to add
+            git_text="${Cyan} $(__git_ps1 "[%s]") ${Color_Off}"
+        else
+            # Changes to working tree
+            git_text="${Red} $(__git_ps1 "{%s}") ${Color_Off}"
+        fi
+        git_ahead=$(git status | awk '/Your branch is ahead/{print "→" $9 " "}\
+            /Your branch is behind/{print $8 "← "}\
+            /diverged/,/respectively/{if ($0 ~ /respectively/) print $6 "←→" $4 " "}')
+        git_text="${git_text}${Yellow}${git_ahead%→*}${Red}${git_ahead#*←}${Color_Off}"
+    else
+        # prompt component when not in git
+        git_text=' '
+    fi
+
+    local date_text=${DarkGray}$(date +%H:%M)${Color_Off}
+    local prompt_char=${exit_status_text}
+    local pwd_text="$(pwd | sed "s|$HOME|~|")"
+
+    local remove_color_codes_regex="s/\\\\\[\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]\\\\\]//g"
+    local length_elements=$(echo -e "${pwd_text}${git_text}${jobs_text}${date_text}" | sed -r $remove_color_codes_regex)
+    local rule_length=$(($COLUMNS - ${#length_elements} - 1))
+
+    local rule
+    if [[ ${rule_length} -gt 0 ]]; then
+        # Everything fits on the info line
+        rule="${DarkGray}$(_repeat_chars '─' ${rule_length}) "
+    elif [[ ${rule_length} == 0 ]]; then
+        # Everything JUST fits on the info line
+        rule=""
+    else
+        # We need to truncate our path because the info line is too short
+        pwd_text="…${pwd_text:$((${rule_length} * -1))}"
+        rule=""
+    fi
+    pwd_text=${BBlue}${pwd_text}${Color_Off}
+    local line_1="${pwd_text}${git_text}${rule}${jobs_text}${date_text}"
+    local line_2="${host_text} ${prompt_char} "
+    PS1="\n${line_1}\n${line_2}"
+}
