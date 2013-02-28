@@ -55,7 +55,7 @@ function prompt_command {
     local username=$(whoami)
     local host_text=${LightGray}${username}@${hostname}${Color_Off}
 
-    local git_text git_text_color git_ahead
+    local git_text git_ahead
     if git branch &> /dev/null; then
         # git is working and we're on a git branch
         if git status | grep "nothing to commit" > /dev/null 2>&1; then
