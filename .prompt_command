@@ -53,7 +53,7 @@ function prompt_command {
 
     local hostname=${HOSTNAME#.*}
     local username=$(whoami)
-    local host_text=${LightGray}${username}@${hostname}${Color_Off}
+    local host_text=${username}@${hostname}
 
     local git_text git_ahead
     if git branch &> /dev/null; then
