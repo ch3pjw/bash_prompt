@@ -51,7 +51,7 @@ function prompt_command {
         fi
     fi
 
-    local hostname=${HOSTNAME#.*}
+    local hostname=${HOSTNAME#*.}
     local username=$(whoami)
     local host_text=${username}@${hostname}
 
