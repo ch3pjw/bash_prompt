@@ -22,3 +22,4 @@ Features include:
 
 ![Bash prompt example screenshot](screenshot.png)
 
+https://www.gittip.com/ch3pjw/
