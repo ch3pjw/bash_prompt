@@ -81,8 +81,23 @@ function prompt_command {
     local prompt_char=${exit_status_text}
     local pwd_text="$(pwd | sed "s|$HOME|~|")"
 
+    local tmux_text tmux_session tmux_group num_tmux_attached_clients
+    local num_tmux_group_clients num_tmux_clients
+    if which tmux &> /dev/null && [[ -n $TMUX ]]; then
+        tmux_session=$(tmux display-message -p '#S')
+        num_tmux_attached_clients=$(tmux list-clients -t ${tmux_session} | wc -l)
+        tmux_group=$(tmux list-sessions | grep "^${tmux_session}:" | grep -o "(group [0-9]*)" | grep -o "[0-9]*") 
+        num_tmux_group_clients=$(tmux list-sessions | grep "group ${tmux_group}" | wc -l)
+        # The main session will be counted in both attached clients and groups:
+        let num_tmux_group_clients-=1
+        num_tmux_clients=$((${num_tmux_attached_clients} + ${num_tmux_group_clients}))
+        if [[ ${num_tmux_clients} -gt 1 ]]; then
+            tmux_text="${Yellow}⎚ ${num_tmux_clients} ${Color_Off}"
+        fi
+    fi
+
     local remove_color_codes_regex="s/\\\\\[\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]\\\\\]//g"
-    local length_elements=$(echo -e "${pwd_text}${git_text}${jobs_text}${date_text}" | sed -r $remove_color_codes_regex)
+    local length_elements=$(echo -e "${pwd_text}${git_text}$tmux_text}${jobs_text}${date_text}" | sed -r $remove_color_codes_regex)
     local rule_length=$(($COLUMNS - ${#length_elements} - 1))
 
     local rule
@@ -98,7 +113,7 @@ function prompt_command {
         rule=""
     fi
     pwd_text=${BBlue}${pwd_text}${Color_Off}
-    local line_1="${pwd_text}${git_text}${rule}${jobs_text}${date_text}"
+    local line_1="${pwd_text}${git_text}${rule}${tmux_text}${jobs_text}${date_text}"
     local line_2="${host_text} ${prompt_char} "
     PS1="\n${line_1}\n${line_2}"
 }
