@@ -41,8 +41,8 @@ function prompt_command {
     fi
 
     # Must run this early because when we use $() this adds to our jobs count
-    local total_jobs=$(jobs | wc -l)
-    local stopped_jobs=$(jobs -s | wc -l)
+    local total_jobs=$(jobs | wc -l | perl -pe 's/\s+//g')
+    local stopped_jobs=$(jobs -s | wc -l | perl -pe 's/\s+//g')
     if [[ ${total_jobs} != 0 ]]; then
         if [[ ${stopped_jobs} == 0 ]]; then
             local jobs_text="${LightGray}[${total_jobs}] ${Color_Off}"
@@ -51,7 +51,7 @@ function prompt_command {
         fi
     fi
 
-    local hostname=${HOSTNAME#*.}
+    local hostname=`hostname -s`
     local username=$(whoami)
     local host_text=${username}@${hostname}
 
@@ -77,7 +77,7 @@ function prompt_command {
         git_text=' '
     fi
 
-    local date_text=${DarkGray}$(date +%H:%M)${Color_Off}
+    local date_text=${Blue}$(date +%H:%M)${Color_Off}
     local prompt_char=${exit_status_text}
     local pwd_text="$(pwd | sed "s|$HOME|~|")"
 
@@ -97,13 +97,13 @@ function prompt_command {
     fi
 
     local remove_color_codes_regex="s/\\\\\[\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]\\\\\]//g"
-    local length_elements=$(echo -e "${pwd_text}${git_text}$tmux_text}${jobs_text}${date_text}" | sed -r $remove_color_codes_regex)
+    local length_elements=$(echo -e "${pwd_text}${git_text}$tmux_text}${jobs_text}${date_text}" | perl -pe $remove_color_codes_regex)
     local rule_length=$(($COLUMNS - ${#length_elements} - 1))
 
     local rule
     if [[ ${rule_length} -gt 0 ]]; then
         # Everything fits on the info line
-        rule="${DarkGray}$(_repeat_chars '─' ${rule_length}) "
+        rule="${White}$(_repeat_chars '─' ${rule_length}) "
     elif [[ ${rule_length} == 0 ]]; then
         # Everything JUST fits on the info line
         rule=""
