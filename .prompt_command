@@ -97,7 +97,7 @@ function prompt_command {
     fi
 
     local remove_color_codes_regex="s/\\\\\[\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]\\\\\]//g"
-    local length_elements=$(echo -e "${pwd_text}${git_text}$tmux_text}${jobs_text}${date_text}" | perl -pe $remove_color_codes_regex)
+    local length_elements=$(echo -e "${pwd_text}${git_text}${tmux_text}${jobs_text}${date_text}" | perl -pe $remove_color_codes_regex)
     local rule_length=$(($COLUMNS - ${#length_elements} - 1))
 
     local rule
