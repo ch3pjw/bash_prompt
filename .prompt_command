@@ -77,7 +77,7 @@ function prompt_command {
         git_text=' '
     fi
 
-    local date_text=${Blue}$(date +%H:%M)${Color_Off}
+    local date_text=${DarkGray}$(date +%H:%M)${Color_Off}
     local prompt_char=${exit_status_text}
     local pwd_text="$(pwd | sed "s|$HOME|~|")"
 
@@ -103,7 +103,7 @@ function prompt_command {
     local rule
     if [[ ${rule_length} -gt 0 ]]; then
         # Everything fits on the info line
-        rule="${White}$(_repeat_chars '─' ${rule_length}) "
+        rule="${DarkGray}$(_repeat_chars '─' ${rule_length}) "
     elif [[ ${rule_length} == 0 ]]; then
         # Everything JUST fits on the info line
         rule=""
