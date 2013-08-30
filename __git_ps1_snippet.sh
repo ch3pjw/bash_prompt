@@ -5,5 +5,5 @@
 
 function __git_ps1 {
     branch_name=$(git branch 2>/dev/null | grep '*' | perl -pe 's/^\* //')
-    echo $(echo $1 | perl -pe "s/%s/${branch_name}/")
+    echo $(echo $1 | perl -pe "s!%s!${branch_name}!")
 }
