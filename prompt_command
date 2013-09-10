@@ -55,6 +55,11 @@ function prompt_command {
     local username=$(whoami)
     local host_text=${username}@${hostname}
 
+    local virtual_env_text=""
+    if [[ -n $VIRTUAL_ENV ]]; then
+        virtual_env_text="${DarkGray} $(basename $VIRTUAL_ENV)${Color_Off}"
+    fi
+
     local git_text git_ahead
     if git branch &> /dev/null; then
         # git is working and we're on a git branch
@@ -97,7 +102,7 @@ function prompt_command {
     fi
 
     local remove_color_codes_regex="s/\\\\\[\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]\\\\\]//g"
-    local length_elements=$(echo -e "${pwd_text}${git_text}${tmux_text}${jobs_text}${date_text}" | perl -pe $remove_color_codes_regex)
+    local length_elements=$(echo -e "${pwd_text}${virtual_env_text}${git_text}${tmux_text}${jobs_text}${date_text}" | perl -pe $remove_color_codes_regex)
     local rule_length=$(($COLUMNS - ${#length_elements} - 1))
 
     local rule
@@ -113,7 +118,7 @@ function prompt_command {
         rule=""
     fi
     pwd_text=${BBlue}${pwd_text}${Color_Off}
-    local line_1="${pwd_text}${git_text}${rule}${tmux_text}${jobs_text}${date_text}"
+    local line_1="${pwd_text}${virtual_env_text}${git_text}${rule}${tmux_text}${jobs_text}${date_text}"
     local line_2="${host_text} ${prompt_char} "
     PS1="\n${line_1}\n${line_2}"
 }
