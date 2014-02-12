@@ -80,7 +80,7 @@ function prompt_command {
             # Changes to working tree
             git_text="${Red} $(__git_ps1 "{%s}") ${Color_Off}"
         fi
-        git_ahead=$(git status | awk '/Your branch is ahead/{print "→" $9 " "}\
+        git_ahead=$(git status | awk '/Your branch is ahead/{print "→" $8 " "}\
             /Your branch is behind/{print $8 "← "}\
             /diverged/,/respectively/{if ($0 ~ /respectively/) print $6 "←→" $4 " "}')
         git_text="${git_text}${Yellow}${git_ahead%→*}${Red}${git_ahead#*←}${Color_Off}"
