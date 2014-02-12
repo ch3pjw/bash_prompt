@@ -31,6 +31,13 @@ function _repeat_chars {
     echo ${temp_str// /${char}}
 }
 
+if ! __git_ps1 &> /dev/null; then
+    # Redefine __git_ps1 to print a helpful warning if it's not installed
+    function __git_ps1 {
+        echo '[Install __git_ps1]'
+    }
+fi
+
 function prompt_command {
     # Must be the first thing we do, otherwise other exit statuses overwrite $?
     local exit_status=$?
