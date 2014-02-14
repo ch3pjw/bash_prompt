@@ -68,7 +68,7 @@ function prompt_command {
     fi
 
     local git_text git_ahead
-    if git branch &> /dev/null; then
+    if git branch &> /dev/null && [ $(__git_ps1) != '(GIT_DIR!)' ]; then
         # git is working and we're on a git branch
         if git status | grep "nothing to commit" > /dev/null 2>&1; then
             # Clean repository - nothing to commit
