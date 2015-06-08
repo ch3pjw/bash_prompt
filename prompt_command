@@ -68,22 +68,27 @@ function prompt_command {
     fi
 
     local git_text git_ahead
-    if git branch &> /dev/null && [ "$(__git_ps1)" != '(GIT_DIR!)' ]; then
+    if git branch &> /dev/null; then
         # git is working and we're on a git branch
-        if git status | grep "nothing to commit" > /dev/null 2>&1; then
-            # Clean repository - nothing to commit
-            git_text="${Green} $(__git_ps1 "(%s)") ${Color_Off}"
-        elif git status | grep "nothing added to commit but untracked files present" > /dev/null 2>&1; then
-            # No changes but files to add
-            git_text="${Cyan} $(__git_ps1 "[%s]") ${Color_Off}"
+        if [[ "$(__git_ps1)" =~ 'GIT_DIR!' ]]; then
+            # we're in the git directory!
+            git_text="${Purple}$(__git_ps1) ${Color_Off}"
         else
-            # Changes to working tree
-            git_text="${Red} $(__git_ps1 "{%s}") ${Color_Off}"
+            if git status | grep "nothing to commit" > /dev/null 2>&1; then
+                # Clean repository - nothing to commit
+                git_text="${Green} $(__git_ps1 "(%s)") ${Color_Off}"
+            elif git status | grep "nothing added to commit but untracked files present" > /dev/null 2>&1; then
+                # No changes but files to add
+                git_text="${Cyan} $(__git_ps1 "[%s]") ${Color_Off}"
+            else
+                # Changes to working tree
+                git_text="${Red} $(__git_ps1 "{%s}") ${Color_Off}"
+            fi
+            git_ahead=$(git status | awk '/Your branch is ahead/{print "→" $8 " "}\
+                /Your branch is behind/{print $7 "← "}\
+                /diverged/,/respectively/{if ($0 ~ /respectively/) print $5 "←→" $3 " "}')
+            git_text="${git_text}${Yellow}${git_ahead%→*}${Red}${git_ahead#*←}${Color_Off}"
         fi
-        git_ahead=$(git status | awk '/Your branch is ahead/{print "→" $8 " "}\
-            /Your branch is behind/{print $7 "← "}\
-            /diverged/,/respectively/{if ($0 ~ /respectively/) print $5 "←→" $3 " "}')
-        git_text="${git_text}${Yellow}${git_ahead%→*}${Red}${git_ahead#*←}${Color_Off}"
     else
         # prompt component when not in git
         git_text=' '
