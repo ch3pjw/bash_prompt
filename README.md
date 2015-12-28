@@ -11,9 +11,6 @@ character right next where you're contuing your train of thought and place the
 completion time of your previous command way over to the right, so it's there
 if you want it but not cluttering your line of sight.
 
-If you find this useful and want me to do more of the same, you can tip me at
-https://www.gittip.com/ch3pjw/
-
 Features include:
 * Dynamic layout (resizes according to the width of your terminal, truncates
   long working directory path if necessary)
@@ -25,3 +22,5 @@ Features include:
 
 ![Bash prompt example screenshot](screenshot.png)
 
+If you're a `zsh` user, there's a port of this prompt at
+https://github.com/ch3pjw/zsh_prompt
