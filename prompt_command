@@ -96,7 +96,7 @@ function prompt_command {
 
     local date_text=${DarkGray}$(date +%H:%M)${Color_Off}
     local prompt_char=${exit_status_text}
-    local pwd_text="$(pwd | perl -pe "s|$HOME|~|")"
+    local pwd_text="$(pwd | perl -pe "s|^$HOME|~|")"
 
     local tmux_text tmux_session tmux_group num_tmux_attached_clients
     local num_tmux_group_clients num_tmux_clients
